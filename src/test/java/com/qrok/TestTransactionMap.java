@@ -21,7 +21,7 @@ public class TestTransactionMap {
   }
 
   /**
-   * This method check how work startTransaction() & commit() method.
+   * This method check how work startTransaction() and commit() method.
    */
   @Test
   public void testStartTransactionAndCommit() {
@@ -34,7 +34,8 @@ public class TestTransactionMap {
 
     transactionMap.commit();
     Assert.assertEquals("Actual transactionMap size must be 3", 3, transactionMap.size());
-    Assert.assertThat(transactionMap, allOf(hasKey(firstKey), hasKey(secondKey)));
+    Assert.assertThat("transactionMap must contain keys",
+        transactionMap, allOf(hasKey(firstKey), hasKey(secondKey), hasKey(thirdKey)));
   }
 
   /**
@@ -47,13 +48,13 @@ public class TestTransactionMap {
     transactionMap.put(secondKey, "SecondValue");
     transactionMap.rollback();
     Assert.assertEquals("Actual transactionMap size must be 1", 1, transactionMap.size());
-    Assert.assertThat(transactionMap, hasKey(firstKey));
+    Assert.assertThat("transactionMap must contain keys", transactionMap, hasKey(firstKey));
   }
 
   /**
    * This method check how will be changes collection in two threads.
    *
-   * @throws InterruptedException
+   * @throws InterruptedException  @see java.lang.InterruptedException
    */
   @Test
   public void testCaseChangeMapInTwoThread() throws InterruptedException {
@@ -80,6 +81,7 @@ public class TestTransactionMap {
     Thread.sleep(1000);
 
     Assert.assertEquals("Actual transaction mup must be 2", 2, transactionMap.size());
-    Assert.assertThat(transactionMap, allOf(hasKey(firstKey), hasKey(secondThreadKey)));
+    Assert.assertThat("transactionMap must contain keys",
+        transactionMap, allOf(hasKey(firstKey), hasKey(secondThreadKey)));
   }
 }
