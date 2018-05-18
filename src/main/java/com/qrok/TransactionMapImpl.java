@@ -48,4 +48,17 @@ public class TransactionMapImpl<K, V> extends HashMap<K, V> implements Transacti
     }
     return super.get(key);
   }
+
+  /**
+   * Removes the mapping for the specified key from this map if present.
+   * @param key key whose mapping is to be removed from the map
+   * @return @see #remove(Object key)
+   */
+  @Override
+  public V remove(Object key) {
+    if (threadLocal != null) {
+      return threadLocal.get().remove(key);
+    }
+    return super.remove(key);
+  }
 }

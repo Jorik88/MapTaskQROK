@@ -84,4 +84,38 @@ public class TestTransactionMap {
     Assert.assertThat("transactionMap must contain keys",
         transactionMap, allOf(hasKey(firstKey), hasKey(secondThreadKey)));
   }
+
+  /**
+   * This test check remove Object by key in two thread.
+   */
+  @Test
+  public void testRemoveObjectByKayInTwoThread() throws InterruptedException {
+    transactionMap.put(firstKey, "FirstValue");
+    final Runnable firstThread = new Runnable() {
+      @Override
+      public void run() {
+        transactionMap.startTransaction();
+        transactionMap.put(firstThreadKey, "FirstThreadValue");
+      }
+    };
+
+    Runnable secondThread = new Runnable() {
+      @Override
+      public void run() {
+        transactionMap.startTransaction();
+        transactionMap.put(secondThreadKey, "SecondThreadValue");
+        transactionMap.put(thirdKey, "ThirdValue");
+        transactionMap.remove(thirdKey);
+        transactionMap.commit();
+      }
+    };
+
+    new Thread(firstThread).start();
+    new Thread(secondThread).start();
+    Thread.sleep(1000);
+
+    Assert.assertEquals("Actual transaction mup must be 2", 2, transactionMap.size());
+    Assert.assertThat("transactionMap must contain keys",
+        transactionMap, allOf(hasKey(firstKey), hasKey(secondThreadKey)));
+  }
 }
