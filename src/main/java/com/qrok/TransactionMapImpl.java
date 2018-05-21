@@ -1,26 +1,36 @@
 package com.qrok;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class TransactionMapImpl<K, V> extends HashMap<K, V> implements TransactionMap<K, V> {
 
-  private ThreadLocal<Map<K, V>> threadLocal = new ThreadLocal<>();
+  private ThreadLocal<Map<K, V>> transactionStorage = new ThreadLocal<>();
+  private ThreadLocal<Set<K>> removedKeys = new ThreadLocal<>();
 
   public void startTransaction() {
-    threadLocal.set(new HashMap<>(this));
+    transactionStorage.set(new HashMap<>(this));
+    removedKeys.set(new HashSet<>());
   }
 
   public void commit() {
-    if (threadLocal.get() == null) {
-      return;
+    if (transactionStorage.get() == null) {
+      throw new IllegalStateException("Transaction is not open");
     }
-    putAll(threadLocal.get());
-    threadLocal.remove();
+    removedKeys.get().forEach(super::remove);
+    putAll(transactionStorage.get());
+    transactionStorage.remove();
+    removedKeys.remove();
   }
 
   public void rollback() {
-    threadLocal.remove();
+    if (transactionStorage.get() == null){
+      throw new IllegalStateException("Transaction is not open");
+    }
+    transactionStorage.remove();
+    removedKeys.remove();
   }
 
   /**
@@ -31,8 +41,8 @@ public class TransactionMapImpl<K, V> extends HashMap<K, V> implements Transacti
    */
   @Override
   public V put(K key, V value) {
-    if (threadLocal.get() != null) {
-      return threadLocal.get().put(key, value);
+    if (transactionStorage.get() != null) {
+      return transactionStorage.get().put(key, value);
     }
     return super.put(key, value);
   }
@@ -43,8 +53,8 @@ public class TransactionMapImpl<K, V> extends HashMap<K, V> implements Transacti
    */
   @Override
   public V get(Object key) {
-    if (threadLocal.get() != null) {
-      return threadLocal.get().get(key);
+    if (transactionStorage.get() != null) {
+      return transactionStorage.get().get(key);
     }
     return super.get(key);
   }
@@ -56,8 +66,9 @@ public class TransactionMapImpl<K, V> extends HashMap<K, V> implements Transacti
    */
   @Override
   public V remove(Object key) {
-    if (threadLocal != null) {
-      return threadLocal.get().remove(key);
+    if (transactionStorage.get() != null) {
+      removedKeys.get().add((K) key);
+      return transactionStorage.get().remove(key);
     }
     return super.remove(key);
   }

@@ -16,11 +16,15 @@ public interface TransactionMap<K,V> extends Map<K,V> {
 
   /**
    *  Commit all changes in the transaction.
+   *  @throws IllegalStateException if the {@code startTransaction} method has not yet been called,
+   *  or the {@code rollback} method has already been called
    */
   void commit();
 
   /**
    * Cancel all changes in the transaction.
+   * @throws IllegalStateException if the {@code startTransaction} method has not yet been called,
+   * or the {@code commit} method has already been called
    */
   void rollback();
 }
