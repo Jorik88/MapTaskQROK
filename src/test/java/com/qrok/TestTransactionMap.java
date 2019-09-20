@@ -246,4 +246,9 @@ public class TestTransactionMap {
   public void testFork() {
 
   }
+
+  @Test
+  public void emptyTest() {
+
+  }
 }
