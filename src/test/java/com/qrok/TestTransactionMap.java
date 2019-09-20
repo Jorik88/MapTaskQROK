@@ -241,4 +241,9 @@ public class TestTransactionMap {
     Assert.assertThat("transactionMap must contain keys",
         transactionMap, allOf(hasKey(firstKey), hasKey(secondThreadKey)));
   }
+
+  @Test
+  public void emptyTest() {
+
+  }
 }
